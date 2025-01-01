@@ -1,0 +1,68 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: labeled
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.event.pull_request.number || github.head_ref || github.sha }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Code Review
+    runs-on: [self-hosted]
+    if: ${{ github.event.label.name == 'AI-PR-Review' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Count specific reviews
+        id: review-counter
+        shell: python
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          import os
+          import requests
+          import json
+          import sys
+
+          reviews_url = f"https://api.github.com/repos/{os.getenv('GITHUB_REPOSITORY')}/pulls/{os.getenv('PR_NUMBER')}/reviews"
+          headers = {
+            'Authorization': f"Bearer {os.getenv('GITHUB_TOKEN')}",
+            'Accept': 'application/vnd.github+json',
+          }
+
+          try:
+              response = requests.get(reviews_url, headers=headers)
+              reviews = response.json()
+              count = sum(1 for review in reviews if 'RazorGenius' in review.get('body', ''))
+              print(f"Number of RazorGenius reviews: {count}")
+              print(f"::set-output name=review-count::{count}")
+          except Exception as e:
+              print(f"An unexpected error occurred: {e}")
+              sys.exit(1)
+
+      - name: Run review process
+        if: steps.review-counter.outputs.review-count < 1
+        uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_CODEREVIEW_SECRET }}
+          KAFKA_CACERTIFICATE: ${{ secrets.STRIMZI_KAFKA_CA_CRT }}
+          KAFKA_USERKEY: ${{ secerts.STRIMZI_KAFKA_USER_KEY }}
+          KAFKA_USERCERTIFICATE: ${{ secrets.STRIMZI_KAFKA_USER_CRT }}
+        with:
+          debug: true
+          review_comment_lgtm: false
+          openai_heavy_model: gpt-4
+          path_filters: |
+            !dist/**
+            !**/*.lock
