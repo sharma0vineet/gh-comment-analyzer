@@ -37,7 +37,7 @@ query($owner: String!, $repo: String!, $number: Int!) {
 
 ```
 
-There are two flags on which logic can be built.\
+There are two flags on which logic can be built.
 1. isResolved: It refers whether a conversation thread has been resolved or not.
 2. isOutdated: It refers to given comment, whether the code block has been updated since the comment is pulished on previous commit.
 
