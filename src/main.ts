@@ -10,7 +10,7 @@ async function run(): Promise<void> {
   const token = process.env.GITHUB_TOKEN;
 
   try {
-    if(pr!=null){
+    if(pr!=null && token!=null){
       const analyzer = new GitHubPRAnalyzer(token);
       const ishighSeveverityCommentIsNotResolved = await analyzer.analyzePRComments(owner, repo, pr.number);
       if(ishighSeveverityCommentIsNotResolved){
