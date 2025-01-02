@@ -1,0 +1,11 @@
+name: 'GH comment analyzer'
+description: 'Comment analyzer'
+branding:
+  icon: 'git-merge'
+  color: 'orange'
+author: 'sharma0vineet'
+inputs:
+  debug:
+    required: false
+    description: 'Enable debug mode'
+    default: 'false'
