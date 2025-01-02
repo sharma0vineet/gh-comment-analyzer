@@ -213,7 +213,7 @@ async function run() {
     const pr = _actions_github__WEBPACK_IMPORTED_MODULE_2__.context.payload.pull_request;
     const token = process.env.GITHUB_TOKEN;
     try {
-        if (pr != null) {
+        if (pr != null && token != null) {
             const analyzer = new _analyzer__WEBPACK_IMPORTED_MODULE_1__/* .GitHubPRAnalyzer */ .D(token);
             const ishighSeveverityCommentIsNotResolved = await analyzer.analyzePRComments(owner, repo, pr.number);
             if (ishighSeveverityCommentIsNotResolved) {

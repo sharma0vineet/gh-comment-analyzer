@@ -9,3 +9,6 @@ inputs:
     required: false
     description: 'Enable debug mode'
     default: 'false'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
